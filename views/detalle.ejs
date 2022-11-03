@@ -1,0 +1,100 @@
+<%- include("template/cabecera", {tituloweb: 'Contactos' }) %>
+
+    <div class="container">
+
+        <h1>Detalle Contacto</h1>
+
+        <% if (error) { %>
+            <%= mensaje %>
+                <a href="/contactos" class="btn btn-dark btn-block my-2">
+                    Volver
+                </a>
+                <% } %>
+
+                    <% if (!error) { %>
+                        <form id="editar" data-id="<%= contacto.id %>">
+                            <input type="text" value="<%= contacto.name %>" class="form-control my-2" name="name"
+                                id="nameInput">
+                            <input type="text" value="<%= contacto.image %>" class="form-control my-2" name="image"
+                                id="imageInput">
+                            <input type="text" value="<%= contacto.email %>" class="form-control my-2" name="email"
+                                id="emailInput">
+                            <input type="text" value="<%= contacto.last_name %>" class="form-control my-2"
+                                name="last_name" id="last_nameInput">
+                            <input type="text" value="<%= contacto.phone %>" class="form-control my-2" name="phone"
+                                id="phoneInput">
+                            <button class="btn btn-warning btn-sm" type="submit">
+                                Editar
+                            </button>
+                        </form>
+                        <hr>
+                        <button class="btn btn-danger btn-sm" data-id="<%= contacto.id %>">
+                            Eliminar
+                        </button>
+                        <% } %>
+
+    </div>
+
+
+    <script>
+        // onclick vs addEventListener
+        // https://stackoverflow.com/questions/6348494/addeventlistener-vs-onclick#:~:text=Essentially%20onclick%20is%20a%20HTML,(using%20this%20for%20example).
+
+        const btnEliminar = document.querySelector('.btn-danger')
+        btnEliminar.addEventListener('click', async () => {
+            console.log(btnEliminar.dataset.id)
+            try {
+                // https://developer.mozilla.org/es/docs/Web/API/HTMLElement/dataset
+                const data = await fetch(`/contactos/${btnEliminar.dataset.id}`, {
+                    method: 'delete'
+                })
+                const res = await data.json()
+                console.log(res)
+                if (res.estado) {
+                    window.location.href = '/contactos'
+                } else {
+                    console.log(res)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+        const formEditar = document.querySelector('#editar');
+
+        formEditar.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            // Alternativa #1 (capturar input)
+            const name = formEditar.elements['name'].value
+            // Alternativa #1 (capturar input)
+            const image = formEditar.elements['image'].value
+            // Alternativa #2 (capturar input)
+            const email = document.querySelector('#emailInput').value
+            // Alternativa #1 (capturar input)
+            const last_name = formEditar.elements['last_name'].value
+            // Alternativa #2 (capturar input)
+            const phone = document.querySelector('#phoneInput').value
+
+            const id = formEditar.dataset.id
+
+            const data = await fetch(`/contactos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: JSON.stringify({ name, image, email, last_name, phone })
+            })
+
+            const res = await data.json()
+
+            if (res.estado) {
+                window.location.href = '/contactos'
+            } else {
+                console.log(res)
+            }
+
+        })
+    </script>
+
+    <%- include("template/footer") %>
